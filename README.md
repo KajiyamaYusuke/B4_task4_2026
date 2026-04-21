@@ -22,7 +22,7 @@ $$\frac{\partial^2}{\partial x_i^2}\phi=0$$
 https://qiita.com/atily17/items/b4e0976867e81a181709
 
 ## 実行方法
-・最初の実行
+・最初の実行 \
 $ sh run.sh\
 $ cd build \
 $ ./HelloWorld
