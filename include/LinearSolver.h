@@ -1,11 +1,11 @@
 #ifndef LINEAR_SOLVER_H
 #define LINEAR_SOLVER_H
 
-#include <vector>
+#include <Eigen/Dense>
 
 class LinearSolver {
 public:
-    static std::vector<double> solve(std::vector<std::vector<double>> A, std::vector<double> b);
+    static Eigen::VectorXd solve(const Eigen::MatrixXd& A, const Eigen::VectorXd& b);
 };
 
 #endif

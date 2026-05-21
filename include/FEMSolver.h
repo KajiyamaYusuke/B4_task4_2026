@@ -3,6 +3,8 @@
 
 #include "Mesh.h"
 
+#include <Eigen/Dense>
+
 #include <string>
 #include <vector>
 
@@ -12,11 +14,11 @@ public:
 
     void solve();
     void writeSolution(const std::string& filename) const;
-    const std::vector<double>& solution() const { return solution_; }
+    const Eigen::VectorXd& solution() const { return solution_; }
 
 private:
     const Mesh& mesh_;
-    std::vector<double> solution_;
+    Eigen::VectorXd solution_;
     std::vector<bool> isDirichlet_;
     std::vector<double> dirichletValue_;
 
@@ -25,9 +27,9 @@ private:
     static constexpr double BOUNDARY_TOL = 1.0e-8;
 
     void setupBoundaryConditions();
-    void assembleGlobalStiffness(std::vector<std::vector<double>>& K) const;
-    void assembleElementStiffness(int elementIndex, double Ke[4][4]) const;
-    void applyDirichletConditions(std::vector<std::vector<double>>& K, std::vector<double>& b) const;
+    void assembleGlobalStiffness(Eigen::MatrixXd& K) const;
+    Eigen::Matrix4d assembleElementStiffness(int elementIndex) const;
+    void applyDirichletConditions(Eigen::MatrixXd& K, Eigen::VectorXd& b) const;
 };
 
 #endif

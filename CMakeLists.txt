@@ -18,6 +18,8 @@ project(LaplaceFEM)
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
+find_package(Eigen3 REQUIRED)
+
 # Source files
 file(GLOB SOURCES
     "src/main.cpp"
@@ -26,8 +28,7 @@ file(GLOB SOURCES
     "src/LinearSolver.cpp"
 )
 
-# Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
 # Add executable
 add_executable(LaplaceFEM ${SOURCES})
+target_include_directories(LaplaceFEM PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+target_link_libraries(LaplaceFEM PRIVATE Eigen3::Eigen)

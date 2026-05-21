@@ -28,7 +28,7 @@ void shapeFunctionDerivatives(double xi, double eta, double dNdXi[4], double dNd
 
 FEMSolver::FEMSolver(const Mesh& mesh)
     : mesh_(mesh),
-      solution_(mesh.nodeCount(), 0.0),
+      solution_(Eigen::VectorXd::Zero(mesh.nodeCount())),
       isDirichlet_(mesh.nodeCount(), false),
       dirichletValue_(mesh.nodeCount(), 0.0) {
     setupBoundaryConditions();
@@ -56,12 +56,8 @@ void FEMSolver::setupBoundaryConditions() {
     }
 }
 
-void FEMSolver::assembleElementStiffness(int elementIndex, double Ke[4][4]) const {
-    for (int i = 0; i < 4; ++i) {
-        for (int j = 0; j < 4; ++j) {
-            Ke[i][j] = 0.0;
-        }
-    }
+Eigen::Matrix4d FEMSolver::assembleElementStiffness(int elementIndex) const {
+    Eigen::Matrix4d Ke = Eigen::Matrix4d::Zero();
 
     const std::array<int, 4>& elem = mesh_.element(elementIndex);
     const double gaussPoints[2] = {-GAUSS_POINT, GAUSS_POINT};
@@ -91,49 +87,40 @@ void FEMSolver::assembleElementStiffness(int elementIndex, double Ke[4][4]) cons
             }
 
             const double invDetJ = 1.0 / detJ;
-            const double dNdx[4] = {
-                invDetJ * (dyDeta * dNdXi[0] - dyDxi * dNdEta[0]),
-                invDetJ * (dyDeta * dNdXi[1] - dyDxi * dNdEta[1]),
-                invDetJ * (dyDeta * dNdXi[2] - dyDxi * dNdEta[2]),
-                invDetJ * (dyDeta * dNdXi[3] - dyDxi * dNdEta[3]),
-            };
-            const double dNdy[4] = {
-                invDetJ * (-dxDeta * dNdXi[0] + dxDxi * dNdEta[0]),
-                invDetJ * (-dxDeta * dNdXi[1] + dxDxi * dNdEta[1]),
-                invDetJ * (-dxDeta * dNdXi[2] + dxDxi * dNdEta[2]),
-                invDetJ * (-dxDeta * dNdXi[3] + dxDxi * dNdEta[3]),
-            };
-
-            for (int i = 0; i < 4; ++i) {
-                for (int j = 0; j < 4; ++j) {
-                    Ke[i][j] += (dNdx[i] * dNdx[j] + dNdy[i] * dNdy[j]) * detJ;
-                }
+            Eigen::Vector4d dNdx;
+            Eigen::Vector4d dNdy;
+            for (int a = 0; a < 4; ++a) {
+                dNdx[a] = invDetJ * (dyDeta * dNdXi[a] - dyDxi * dNdEta[a]);
+                dNdy[a] = invDetJ * (-dxDeta * dNdXi[a] + dxDxi * dNdEta[a]);
             }
+
+            Ke += (dNdx * dNdx.transpose() + dNdy * dNdy.transpose()) * detJ;
         }
     }
+
+    return Ke;
 }
 
-void FEMSolver::assembleGlobalStiffness(std::vector<std::vector<double>>& K) const {
+void FEMSolver::assembleGlobalStiffness(Eigen::MatrixXd& K) const {
     const int nodeCount = mesh_.nodeCount();
-    K.assign(nodeCount, std::vector<double>(nodeCount, 0.0));
+    K.setZero(nodeCount, nodeCount);
 
     const int elementCount = mesh_.elementCount();
     for (int e = 0; e < elementCount; ++e) {
-        double Ke[4][4] = {};
-        assembleElementStiffness(e, Ke);
-
+        const Eigen::Matrix4d Ke = assembleElementStiffness(e);
         const std::array<int, 4>& elem = mesh_.element(e);
+
         for (int i = 0; i < 4; ++i) {
             const int globalI = elem[i];
             for (int j = 0; j < 4; ++j) {
                 const int globalJ = elem[j];
-                K[globalI][globalJ] += Ke[i][j];
+                K(globalI, globalJ) += Ke(i, j);
             }
         }
     }
 }
 
-void FEMSolver::applyDirichletConditions(std::vector<std::vector<double>>& K, std::vector<double>& b) const {
+void FEMSolver::applyDirichletConditions(Eigen::MatrixXd& K, Eigen::VectorXd& b) const {
     const int nodeCount = mesh_.nodeCount();
     for (int i = 0; i < nodeCount; ++i) {
         if (!isDirichlet_[i]) {
@@ -143,23 +130,21 @@ void FEMSolver::applyDirichletConditions(std::vector<std::vector<double>>& K, st
         const double value = dirichletValue_[i];
         for (int k = 0; k < nodeCount; ++k) {
             if (!isDirichlet_[k]) {
-                b[k] -= K[k][i] * value;
+                b[k] -= K(k, i) * value;
             }
         }
 
-        for (int k = 0; k < nodeCount; ++k) {
-            K[i][k] = 0.0;
-            K[k][i] = 0.0;
-        }
-        K[i][i] = 1.0;
+        K.row(i).setZero();
+        K.col(i).setZero();
+        K(i, i) = 1.0;
         b[i] = value;
     }
 }
 
 void FEMSolver::solve() {
     const int nodeCount = mesh_.nodeCount();
-    std::vector<std::vector<double>> K;
-    std::vector<double> b(nodeCount, 0.0);
+    Eigen::MatrixXd K;
+    Eigen::VectorXd b = Eigen::VectorXd::Zero(nodeCount);
 
     assembleGlobalStiffness(K);
     applyDirichletConditions(K, b);
