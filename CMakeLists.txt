@@ -13,19 +13,26 @@ elseif(DEFINED compiler)
 endif()
 
 # Project name
-project(HelloWorld)
+project(LaplaceFEM)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 14)
 
-# Source files
-file(GLOB SOURCES
-    "src/main.cpp"
-    "src/Greeter.cpp"
+# ===== Eigen =====
+find_package(Eigen3 REQUIRED)
+
+# ===== Source files =====
+set(SOURCES
+    "kadai4.cpp"
 )
 
-# Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# ===== Include directories =====
+include_directories(
+    ${CMAKE_CURRENT_SOURCE_DIR}/include
+)
 
-# Add executable
-add_executable(HelloWorld ${SOURCES})
+# ===== Add executable =====
+add_executable(LaplaceFEM ${SOURCES})
+
+# ===== Link Eigen =====
+target_link_libraries(LaplaceFEM Eigen3::Eigen)
