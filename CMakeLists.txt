@@ -1,31 +1,18 @@
-# Set the minimum CMake version required for the project
 cmake_minimum_required(VERSION 3.10)
 
-# Compiler options
 if(compiler STREQUAL intel)
-    # Use Intel compiler if specified
     set(CMAKE_C_COMPILER "icx")
     set(CMAKE_CXX_COMPILER "icpx")
     set(base_compile_options "-Wall -Wextra -O3")
 elseif(DEFINED compiler)
-    # Error if an invalid compiler is specified
-    message(FATAL ERROR "invalid compiler")
+    message(FATAL_ERROR "invalid compiler")
 endif()
 
-# Project name
-project(HelloWorld)
+project(LaplaceFEM2D CXX)
 
-# Set the C++ standard
 set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Source files
-file(GLOB SOURCES
-    "src/main.cpp"
-    "src/Greeter.cpp"
+add_executable(LaplaceFEM2D
+    src/laplace.cpp
 )
-
-# Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Add executable
-add_executable(HelloWorld ${SOURCES})
