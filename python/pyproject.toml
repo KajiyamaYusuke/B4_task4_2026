@@ -1,0 +1,9 @@
+[project]
+name = "laplace-visualizer"
+version = "0.1.0"
+description = "Visualize FEM Laplace solver output"
+requires-python = ">=3.10"
+dependencies = [
+    "matplotlib>=3.5",
+    "numpy>=1.20",
+]

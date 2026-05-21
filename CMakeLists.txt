@@ -9,11 +9,11 @@ if(compiler STREQUAL intel)
     set(base_compile_options "-Wall -Wextra -O3")
 elseif(DEFINED compiler)
     # Error if an invalid compiler is specified
-    message(FATAL ERROR "invalid compiler")
+    message(FATAL_ERROR "invalid compiler")
 endif()
 
 # Project name
-project(HelloWorld)
+project(LaplaceFEM)
 
 # Set the C++ standard
 set(CMAKE_CXX_STANDARD 14)
@@ -21,11 +21,13 @@ set(CMAKE_CXX_STANDARD 14)
 # Source files
 file(GLOB SOURCES
     "src/main.cpp"
-    "src/Greeter.cpp"
+    "src/Mesh.cpp"
+    "src/FEMSolver.cpp"
+    "src/LinearSolver.cpp"
 )
 
 # Include directories
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 # Add executable
-add_executable(HelloWorld ${SOURCES})
+add_executable(LaplaceFEM ${SOURCES})
