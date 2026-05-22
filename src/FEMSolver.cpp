@@ -5,6 +5,7 @@
 #include <cmath>
 #include <filesystem>
 #include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <limits>
 #include <stdexcept>
@@ -117,26 +118,26 @@ void FEMSolver::assemble()
 
 void FEMSolver::applyBoundaryCondition()
 {
-    double yMin = std::numeric_limits<double>::max();
-    double yMax = std::numeric_limits<double>::lowest();
+    double xMin = std::numeric_limits<double>::max();
+    double xMax = std::numeric_limits<double>::lowest();
 
     for (const auto& node : mesh.nodes) {
-        yMin = std::min(yMin, node[1]);
-        yMax = std::max(yMax, node[1]);
+        xMin = std::min(xMin, node[0]);
+        xMax = std::max(xMax, node[0]);
     }
 
-    const double tolerance = std::max(1.0e-12, (yMax - yMin) * 1.0e-8);
+    const double tolerance = std::max(1.0e-12, (xMax - xMin) * 1.0e-8);
 
     for (int nodeId = 0; nodeId < mesh.nodeCount; nodeId++) {
-        const double y = mesh.nodes[nodeId][1];
+        const double x = mesh.nodes[nodeId][0];
         double value = 0.0;
         bool isDirichlet = false;
 
-        if (std::abs(y - yMin) <= tolerance) {
-            value = 0.0;
-            isDirichlet = true;
-        } else if (std::abs(y - yMax) <= tolerance) {
+        if (std::abs(x - xMin) <= tolerance) {
             value = 1.0;
+            isDirichlet = true;
+        } else if (std::abs(x - xMax) <= tolerance) {
+            value = 0.0;
             isDirichlet = true;
         }
 
@@ -173,15 +174,17 @@ void FEMSolver::output()
         return;
     }
 
-for (int i = 0; i < U.size(); i++) {
+    ofs << std::setprecision(15);
 
-    double x = mesh.nodes[i][0];
-    double y = mesh.nodes[i][1];
+    for (int i = 0; i < U.size(); i++) {
 
-    ofs << x << " "
-        << y << " "
-        << U(i) << std::endl;
-}
+        double x = mesh.nodes[i][0];
+        double y = mesh.nodes[i][1];
+
+        ofs << x << " "
+            << y << " "
+            << U(i) << std::endl;
+    }
 
     std::cout << "output" << std::endl;
 }
