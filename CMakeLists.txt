@@ -1,31 +1,33 @@
-# Set the minimum CMake version required for the project
 cmake_minimum_required(VERSION 3.10)
 
+project(FEMSolver)
+
+# C++ standard
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
 # Compiler options
-if(compiler STREQUAL intel)
-    # Use Intel compiler if specified
-    set(CMAKE_C_COMPILER "icx")
-    set(CMAKE_CXX_COMPILER "icpx")
-    set(base_compile_options "-Wall -Wextra -O3")
-elseif(DEFINED compiler)
-    # Error if an invalid compiler is specified
-    message(FATAL ERROR "invalid compiler")
+if(MSVC)
+    add_compile_options(/W4)
+else()
+    add_compile_options(-Wall -Wextra -O2)
 endif()
 
-# Project name
-project(HelloWorld)
+# Eigen
+find_package(Eigen3 CONFIG REQUIRED)
 
-# Set the C++ standard
-set(CMAKE_CXX_STANDARD 14)
+# Include directories
+include_directories(include)
 
 # Source files
 file(GLOB SOURCES
     "src/main.cpp"
-    "src/Greeter.cpp"
+    "src/Mesh.cpp"
+    "src/FEMSolver.cpp"
 )
 
-# Include directories
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+# Executable
+add_executable(FEMSolver ${SOURCES})
 
-# Add executable
-add_executable(HelloWorld ${SOURCES})
+# Link Eigen
+target_link_libraries(FEMSolver PRIVATE Eigen3::Eigen)
