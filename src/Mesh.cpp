@@ -7,37 +7,40 @@ void Mesh::loadNode(const std::string& filename)
 {
     std::ifstream ifs(filename);
 
+    nodes.clear();
+    nodeCount = 0;
+
     if (!ifs) {
-        std::cout << "node file open error" << std::endl;
+        std::cerr << "node file open error: " << filename << std::endl;
         return;
     }
 
-    int id;
     double x, y;
 
-    while (ifs >> id >> x >> y) {
-
+    while (ifs >> x >> y) {
         nodes.push_back({ x, y });
     }
 
-    nodeCount = nodes.size();
+    nodeCount = static_cast<int>(nodes.size());
 }
 
 void Mesh::loadElement(const std::string& filename)
 {
     std::ifstream ifs(filename);
 
+    elements.clear();
+    elementCount = 0;
+
     if (!ifs) {
-        std::cout << "element file open error" << std::endl;
+        std::cerr << "element file open error: " << filename << std::endl;
         return;
     }
 
-    int id, n1, n2, n3;
+    int n1, n2, n3, n4;
 
-    while (ifs >> id >> n1 >> n2 >> n3) {
-
-        elements.push_back({ n1, n2, n3 });
+    while (ifs >> n1 >> n2 >> n3 >> n4) {
+        elements.push_back({ n1, n2, n3, n4 });
     }
 
-    elementCount = elements.size();
+    elementCount = static_cast<int>(elements.size());
 }

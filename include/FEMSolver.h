@@ -1,45 +1,21 @@
-#include "FEMSolver.h"
+#pragma once
 
-#include <fstream>
-#include <iostream>
+#include "Mesh.h"
 
-FEMSolver::FEMSolver(const Mesh& m)
-    : mesh(m)
-{
-    int n = mesh.nodeCount;
+#include <Eigen/Dense>
 
-    K = Eigen::MatrixXd::Zero(n, n);
+class FEMSolver {
+public:
+    explicit FEMSolver(const Mesh& m);
 
-    F = Eigen::VectorXd::Zero(n);
+    void assemble();
+    void applyBoundaryCondition();
+    void solve();
+    void output();
 
-    U = Eigen::VectorXd::Zero(n);
-}
-
-void FEMSolver::assemble()
-{
-    std::cout << "assemble" << std::endl;
-}
-
-void FEMSolver::applyBoundaryCondition()
-{
-    std::cout << "boundary condition" << std::endl;
-}
-
-void FEMSolver::solve()
-{
-    U = K.colPivHouseholderQr().solve(F);
-
-    std::cout << "solve" << std::endl;
-}
-
-void FEMSolver::output()
-{
-    std::ofstream ofs("../output/result.dat");
-
-    for (int i = 0; i < U.size(); i++) {
-
-        ofs << U(i) << std::endl;
-    }
-
-    std::cout << "output" << std::endl;
-}
+private:
+    const Mesh& mesh;
+    Eigen::MatrixXd K;
+    Eigen::VectorXd F;
+    Eigen::VectorXd U;
+};

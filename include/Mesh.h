@@ -6,8 +6,8 @@
 class Mesh {
 public:
 
-    int nodeCount;
-    int elementCount;
+    int nodeCount = 0;
+    int elementCount = 0;
 
     std::vector<std::vector<double>> nodes;
 

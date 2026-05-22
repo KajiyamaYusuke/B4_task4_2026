@@ -25,7 +25,7 @@ https://qiita.com/atily17/items/b4e0976867e81a181709
 ・最初の実行 \
 $ sh run.sh\
 $ cd build \
-$ ./HelloWorld
+$ ./FEMSolver
 
 その後は適宜追加したファイルをCMakeListsに追加，再度 $ sh run.sh を実行．
 既存コードの書き換えのみならbuildディレクトリ内でmakeするだけでok.
