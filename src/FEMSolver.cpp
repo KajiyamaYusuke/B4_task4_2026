@@ -173,10 +173,15 @@ void FEMSolver::output()
         return;
     }
 
-    for (int i = 0; i < U.size(); i++) {
+for (int i = 0; i < U.size(); i++) {
 
-        ofs << U(i) << std::endl;
-    }
+    double x = mesh.nodes[i][0];
+    double y = mesh.nodes[i][1];
+
+    ofs << x << " "
+        << y << " "
+        << U(i) << std::endl;
+}
 
     std::cout << "output" << std::endl;
 }
