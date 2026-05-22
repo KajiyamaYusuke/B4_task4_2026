@@ -38,16 +38,6 @@ private:
         mkdir(dirname.c_str(), 0755);
     }
 
-    void applyDirichlet(int nodeIndex, double value) {
-        F -= K.col(nodeIndex) * value;
-
-        K.row(nodeIndex).setZero();
-        K.col(nodeIndex).setZero();
-
-        K(nodeIndex, nodeIndex) = 1.0;
-        F(nodeIndex) = value;
-    }
-
 public:
     FEMSolver() : numNodes(0), numElements(0), baseDir("") {}
 
@@ -190,16 +180,26 @@ public:
 
         for (int i = 0; i < numNodes; i++) {
 
-            double x = nodes[i](0);
+            double y = nodes[i](1);
 
-            // 左端 x=0 → phi=1
-            if (fabs(x - 0.0) < 1e-6) {
-                applyDirichlet(i, 1.0);
+            // 下端 y=0 → phi=0
+            if (fabs(y - 0.0) < 1e-6) {
+
+                K.row(i).setZero();
+                K.col(i).setZero();
+
+                K(i,i) = 1.0;
+                F(i) = 0.0;
             }
 
-            // 右端 x=5 → phi=0
-            if (fabs(x - 5.0) < 1e-6) {
-                applyDirichlet(i, 0.0);
+            // 上端 y=1 → phi=1
+            if (fabs(y - 1.0) < 1e-6) {
+
+                K.row(i).setZero();
+                K.col(i).setZero();
+
+                K(i,i) = 1.0;
+                F(i) = 1.0;
             }
         }
     }
